@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1f4d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ตรวจข้อสอบ</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Serif+Thai:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fff; --fg:#0e1a33; --mute:#8790a3; --line:#eceef3; --soft:#f4f6fa; --ok:#12a150; --bad:#e5484d;
+    --navy:#0b1f4d; --navy2:#06122e; --gold:#ffc72c; --gold2:#ffdf7e; --acc:var(--navy); }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font:16px/1.45 "Noto Sans Thai", system-ui, -apple-system, sans-serif; }
+  button, input, textarea { font:inherit; color:inherit; }
+  button { cursor:pointer; border:0; background:none; padding:0; }
+  .screen { display:none; min-height:100%; padding:calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 96px); max-width:560px; margin:0 auto; }
+  .screen.on { display:block; }
+  header { display:flex; align-items:center; gap:12px; margin:4px 0 24px; }
+  header h1 { font-size:24px; font-weight:700; margin:0; flex:1; letter-spacing:-.01em; }
+  .icon { width:40px; height:40px; display:grid; place-items:center; border-radius:20px; font-size:20px; color:var(--mute); }
+  .icon:active { background:var(--soft); }
+  .list { list-style:none; margin:0; padding:0; }
+  .list li { display:flex; align-items:center; gap:12px; padding:14px 2px; border-bottom:1px solid var(--line); }
+  .list li:active { background:var(--soft); }
+  .list .main { flex:1; min-width:0; }
+  .list .t { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list .s { color:var(--mute); font-size:13px; }
+  .list .n { font-weight:700; font-size:20px; font-variant-numeric:tabular-nums; }
+  .list .n small { color:var(--mute); font-weight:400; font-size:13px; }
+  .list img { height:26px; max-width:150px; object-fit:contain; object-position:left; opacity:.85; }
+  .empty { color:var(--mute); text-align:center; padding:64px 0; }
+  .bar { position:fixed; left:0; right:0; bottom:0; padding:12px 20px calc(env(safe-area-inset-bottom) + 12px);
+    background:linear-gradient(transparent, var(--bg) 30%); display:flex; gap:10px; max-width:560px; margin:0 auto; }
+  .btn { flex:1; height:52px; border-radius:14px; background:var(--soft); font-weight:500; }
+  .btn.pri { background:var(--acc); color:#fff; }
+  .btn.sm { flex:0 0 auto; padding:0 18px; }
+  .btn:active { opacity:.7; }
+  label.f { display:block; margin-bottom:18px; }
+  label.f span { display:block; font-size:13px; color:var(--mute); margin-bottom:6px; }
+  .inp { width:100%; height:50px; border:1px solid var(--line); border-radius:12px; padding:0 14px; background:var(--bg); outline:none; }
+  .inp:focus { border-color:#bbb; }
+  textarea.inp { height:auto; padding:12px 14px; min-height:96px; resize:vertical; }
+  .row2 { display:flex; gap:10px; align-items:end; }
+  .row2 > * { flex:1; }
+  .keyhead { display:flex; align-items:center; justify-content:space-between; margin:8px 0 6px; font-size:13px; color:var(--mute); }
+  .paste { border:1.5px dashed #c8cfdd; border-radius:16px; background:linear-gradient(180deg, #fffdf4, #fff); margin-bottom:14px; transition:border-color .2s, box-shadow .2s; }
+  .paste:focus-within { border-color:var(--gold); box-shadow:0 0 0 4px rgba(255,199,44,.18); }
+  .paste.done { border-style:solid; border-color:var(--ok); }
+  .paste textarea { display:block; width:100%; border:0; background:transparent; resize:vertical; outline:none; padding:14px 14px 6px; min-height:72px; font-size:15px; }
+  .paste textarea::placeholder { color:#a3abbb; line-height:1.6; }
+  .pfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 8px 8px 14px; }
+  .pfoot span { font-size:13px; color:var(--mute); }
+  .paste.done .pfoot span { color:var(--ok); font-weight:500; }
+  .paste.warn .pfoot span { color:#b26b00; }
+  .pfoot button { height:34px; padding:0 14px; border-radius:17px; background:var(--navy); color:#fff; font-size:13px; font-weight:500; white-space:nowrap; }
+  .pfoot button:active { opacity:.8; }
+  .link { color:var(--fg); font-size:14px; text-decoration:underline; text-underline-offset:3px; }
+  .key { display:grid; grid-template-columns:1fr 1fr; column-gap:18px; }
+  .kq { display:flex; align-items:center; gap:4px; padding:5px 0; }
+  .kq b { width:26px; font-weight:500; color:var(--mute); font-size:13px; text-align:right; margin-right:4px; font-variant-numeric:tabular-nums; }
+  .kq button { width:32px; height:32px; border-radius:16px; border:1px solid var(--line); font-size:14px; }
+  .kq button.on { background:var(--acc); border-color:var(--acc); color:#fff; }
+  @media (max-width:460px) {
+    .key { grid-template-columns:1fr; }
+    .kq { gap:8px; padding:4px 0; }
+    .kq b { width:30px; }
+    .kq button { flex:1; height:40px; border-radius:20px; font-size:15px; }
+  }
+  .note { font-size:13px; color:var(--mute); margin:6px 0 18px; }
+  /* landing */
+  #home { padding-top:0; }
+  .hero { position:relative; overflow:hidden; margin:0 -20px; padding:calc(env(safe-area-inset-top) + 18px) 24px 30px;
+    background:radial-gradient(120% 80% at 100% 0%, #1b3a80 0%, transparent 60%), linear-gradient(160deg, var(--navy) 0%, var(--navy2) 100%);
+    color:#fff; border-radius:0 0 32px 32px; }
+  .hero::after { content:""; position:absolute; right:-70px; top:-70px; width:220px; height:220px; border-radius:50%;
+    border:1px solid rgba(255,199,44,.25); box-shadow:0 0 0 28px rgba(255,199,44,.05), 0 0 0 56px rgba(255,199,44,.03); pointer-events:none; }
+  .brand { display:flex; align-items:center; gap:10px; position:relative; z-index:1; }
+  .brand .mk { width:30px; height:30px; border-radius:9px; background:var(--gold); display:grid; grid-template-columns:1fr 1fr; gap:3px; padding:7px; }
+  .brand .mk i { border-radius:50%; border:1.5px solid var(--navy); }
+  .brand .mk i.f { background:var(--navy); }
+  .brand span { flex:1; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.65); font-weight:500; }
+  .brand .icon { color:rgba(255,255,255,.75); }
+  .brand .icon:active { background:rgba(255,255,255,.1); }
+  .hero h2 { position:relative; z-index:1; font-family:"Noto Serif Thai", serif; font-weight:600; font-size:38px; line-height:1.25; margin:34px 0 12px; letter-spacing:-.01em; }
+  .hero h2 em { font-style:normal; color:var(--gold); position:relative; white-space:nowrap; }
+  .hero h2 em::after { content:""; position:absolute; left:2px; right:2px; bottom:4px; height:3px; border-radius:2px; background:var(--gold); opacity:.45; }
+  .hero p { position:relative; z-index:1; margin:0 0 22px; color:rgba(255,255,255,.72); font-size:15px; max-width:30ch; }
+  .bubbles { position:relative; z-index:1; display:flex; gap:10px; margin:0 0 26px; align-items:center; }
+  .bubbles b { font-size:12px; color:rgba(255,255,255,.5); width:22px; font-weight:500; }
+  .bubbles i { width:26px; height:26px; border-radius:50%; border:1.5px dashed rgba(255,255,255,.35); display:grid; place-items:center; font-style:normal; font-size:11px; color:rgba(255,255,255,.45); }
+  .bubbles i.f { border:0; background:var(--gold); color:var(--navy); font-weight:700; box-shadow:0 0 0 5px rgba(255,199,44,.15); animation:pop 2.4s ease-in-out infinite; }
+  @keyframes pop { 0%,100% { transform:scale(1); } 50% { transform:scale(1.08); } }
+  .cta { position:relative; z-index:1; width:100%; height:56px; border-radius:16px; background:var(--gold); color:var(--navy); font-weight:700; font-size:17px;
+    display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 10px 30px rgba(255,199,44,.25); }
+  .cta:active { transform:scale(.98); }
+  .steps { position:relative; z-index:1; display:flex; margin:22px 0 0; padding-top:18px; border-top:1px solid rgba(255,255,255,.1); }
+  .steps div { flex:1; font-size:12.5px; color:rgba(255,255,255,.6); line-height:1.35; }
+  .steps div b { display:block; color:var(--gold); font-family:"Noto Serif Thai", serif; font-size:18px; font-weight:600; margin-bottom:2px; }
+  .sect { display:flex; align-items:baseline; justify-content:space-between; margin:28px 0 4px; }
+  .sect h3 { margin:0; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); font-weight:500; }
+  .sect small { color:var(--mute); font-size:13px; }
+  #examList li .n { color:var(--navy); }
+  #examList li .dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex:0 0 auto; }
+  .feats { display:grid; gap:10px; margin:28px 0 0; }
+  .feats div { display:grid; grid-template-columns:40px 1fr; column-gap:12px; align-items:center; padding:14px; border-radius:16px; background:var(--soft); }
+  .feats i { grid-row:span 2; width:40px; height:40px; border-radius:12px; background:var(--navy); color:var(--gold); display:grid; place-items:center; font-style:normal; font-size:18px; }
+  .feats b { font-size:15px; color:var(--navy); }
+  .feats span { font-size:13px; color:var(--mute); }
+  .empty2 { text-align:center; color:var(--mute); padding:36px 0 8px; font-size:14px; }
+  .stats { display:flex; gap:24px; margin:-8px 0 16px; color:var(--mute); font-size:14px; }
+  .stats b { color:var(--navy); font-size:18px; display:block; }
+  .stats div { border-left:3px solid var(--gold); padding-left:10px; }
+  .toast { background:var(--navy) !important; }
+  /* scan */
+  #scan { position:fixed; inset:0; padding:0; max-width:none; background:#000; color:#fff; }
+  #scan video, #scan canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .stop { position:absolute; top:calc(env(safe-area-inset-top) + 12px); left:12px; right:12px; display:flex; align-items:center; gap:10px; z-index:3; }
+  .stop .icon { color:#fff; background:rgba(0,0,0,.35); }
+  .stop .ttl { flex:1; font-weight:500; text-shadow:0 1px 3px rgba(0,0,0,.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .stop .cnt { background:rgba(0,0,0,.35); padding:6px 12px; border-radius:16px; font-size:14px; font-variant-numeric:tabular-nums; }
+  .guide { position:absolute; left:8%; right:8%; top:14%; bottom:16%; border:2px solid rgba(255,255,255,.35); border-radius:18px; z-index:1; pointer-events:none; transition:border-color .2s; }
+  .guide.lock { border-color:var(--gold); }
+  /* โหมดถ่ายรูป */
+  .shoot { display:none; }
+  .vh { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+  #scan.photo { background:radial-gradient(120% 70% at 100% 0%, #1b3a80 0%, transparent 60%), linear-gradient(160deg, var(--navy), var(--navy2)); }
+  #scan.photo video, #scan.photo canvas, #scan.photo .guide { display:none; }
+  #scan.photo .shoot { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:0 28px; z-index:2; }
+  #scan.photo .status { bottom:auto; top:calc(env(safe-area-inset-top, 0px) + 72px); padding:0 20px; }
+  #scan.photo .status span { background:rgba(255,255,255,.08); display:inline-block; line-height:1.5; }
+  .shoot .cta { max-width:360px; cursor:pointer; }
+  .pickl { color:rgba(255,255,255,.75); font-size:14px; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  .sheetart { position:relative; width:150px; aspect-ratio:1/1.41; border-radius:10px; background:#fff; margin-bottom:18px; box-shadow:0 20px 50px rgba(0,0,0,.35); transform:rotate(-4deg); }
+  .sheetart i { position:absolute; width:16px; height:16px; background:var(--navy); border-radius:2px; }
+  .sheetart i:nth-child(1) { left:10px; top:10px; } .sheetart i:nth-child(2) { right:10px; top:10px; }
+  .sheetart i:nth-child(3) { left:10px; bottom:10px; } .sheetart i:nth-child(4) { right:10px; bottom:10px; }
+  .sheetart b { position:absolute; left:34px; right:34px; height:10px; border-radius:5px; background:repeating-linear-gradient(90deg, #d8dce6 0 10px, transparent 10px 16px); }
+  .sheetart b:nth-of-type(1) { top:60px; } .sheetart b:nth-of-type(2) { top:84px; background:repeating-linear-gradient(90deg, #d8dce6 0 10px, transparent 10px 16px, var(--gold) 16px 26px, transparent 26px 32px, #d8dce6 32px 42px, transparent 42px 48px); }
+  .sheetart b:nth-of-type(3) { top:108px; }
+  #scan.photo .card { bottom:calc(env(safe-area-inset-bottom, 0px) + 20px); }
+  .card .next { margin-top:14px; height:50px; font-size:16px; cursor:pointer; }
+  .status { position:absolute; left:0; right:0; bottom:calc(env(safe-area-inset-bottom) + 28px); text-align:center; z-index:3; }
+  .status span { background:rgba(0,0,0,.55); padding:10px 18px; border-radius:22px; font-size:15px; }
+  .card { position:absolute; left:20px; right:20px; bottom:calc(env(safe-area-inset-bottom) + 84px); z-index:4; background:#fff; color:#111;
+    border-radius:20px; padding:20px; display:none; box-shadow:0 12px 40px rgba(0,0,0,.35); }
+  .card.on { display:block; animation:up .25s ease-out; }
+  @keyframes up { from { transform:translateY(20px); opacity:0; } }
+  .card { border-top:4px solid var(--gold); }
+  .card .sc { font-size:44px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; color:var(--navy); }
+  .card .sc small { font-size:20px; color:var(--mute); font-weight:400; }
+  .card .who { margin-top:8px; font-size:15px; }
+  .card .who img { display:block; max-width:100%; height:36px; object-fit:contain; object-position:left; margin-top:4px; }
+  .card .warn { color:#b26b00; font-size:13px; margin-top:6px; }
+  /* detail sheet */
+  .sheet { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; z-index:10; align-items:flex-end; }
+  .sheet.on { display:flex; }
+  .sheet > div { background:var(--bg); width:100%; max-width:560px; margin:0 auto; border-radius:20px 20px 0 0; padding:20px 20px calc(env(safe-area-inset-bottom) + 20px); max-height:88vh; overflow:auto; }
+  .nameimg { width:100%; border-radius:10px; border:1px solid var(--line); margin-bottom:12px; }
+  .ans { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:14px 0 18px; font-size:13px; }
+  .ans div { padding:6px 0; border-radius:8px; text-align:center; background:var(--soft); font-variant-numeric:tabular-nums; }
+  .ans .ok { background:#e8f7ee; color:var(--ok); }
+  .ans .no { background:#fdeced; color:var(--bad); }
+  .toast { position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 90px); transform:translateX(-50%); background:#111; color:#fff;
+    padding:10px 16px; border-radius:12px; font-size:14px; z-index:20; display:none; }
+  .toast.on { display:block; }
+  .danger { color:var(--bad); }
+</style>
+</head>
+<body>
+
+<!-- หน้าแรก: รายการชุดข้อสอบ -->
+<section class="screen on" id="home">
+  <div class="hero">
+    <div class="brand"><div class="mk"><i></i><i class="f"></i><i></i><i></i></div><span>Smart OMR · Answer Sheet</span>
+      <button class="icon" data-go="settings" aria-label="ตั้งค่า">⚙︎</button></div>
+    <h2>ตรวจข้อสอบ<br><em>ในพริบตา</em></h2>
+    <p>วางกระดาษคำตอบ ระบบโฟกัส ถ่าย และให้คะแนนเอง แม่นยำทุกวงที่ฝน</p>
+    <div class="bubbles" aria-hidden="true"><b>01</b><i>ก</i><i class="f">ข</i><i>ค</i><i>ง</i></div>
+    <button class="cta" id="newExam">เริ่มตรวจชุดใหม่ <span>→</span></button>
+    <div class="steps"><div><b>01</b>ใส่เฉลย</div><div><b>02</b>วางกระดาษ</div><div><b>03</b>ได้คะแนน<br>&amp; Excel</div></div>
+  </div>
+  <div class="sect"><h3>ชุดข้อสอบ</h3><small id="examCount"></small></div>
+  <ul class="list" id="examList"></ul>
+  <div class="feats">
+    <div><i>◎</i><b>แม่นยำ</b><span>อ่านซ้ำ 2 ภาพก่อนบันทึก ชดเชยกระดาษโค้ง</span></div>
+    <div><i>⚡︎</i><b>อัตโนมัติ</b><span>ไม่ต้องกดถ่าย วางแผ่นต่อไปได้ทันที</span></div>
+    <div><i>▤</i><b>ส่งออก</b><span>คะแนนและชื่อ เป็น Excel / CSV</span></div>
+  </div>
+</section>
+
+<!-- สร้าง/แก้ไขชุด -->
+<section class="screen" id="edit">
+  <header><button class="icon" id="editBack" aria-label="กลับ">←</button><h1 id="editTitle">ชุดใหม่</h1></header>
+  <label class="f"><span>วิชา</span><input class="inp" id="fSubject" placeholder="เช่น คณิตศาสตร์วิศวกรรม 1"></label>
+  <label class="f"><span>จำนวนข้อ (1–60)</span><input class="inp" id="fN" type="number" inputmode="numeric" min="1" max="60" value="60"></label>
+  <div class="keyhead"><span>เฉลย</span><button class="link" id="scanKey">สแกนจากกระดาษ</button></div>
+  <div class="paste">
+    <textarea id="fKeyText" rows="3" placeholder="วางเฉลยได้ทุกรูปแบบ แล้วระบบจะเรียงให้เอง&#10;กขคงก… · 1.ก 2.ข … · A B C D … · คัดลอกจาก Excel/Word"></textarea>
+    <div class="pfoot"><span id="pasteMsg">✦ ช่องวางอัจฉริยะ</span><button id="pasteBtn">วางจากคลิปบอร์ด</button></div>
+  </div>
+  <div class="key" id="keyGrid"></div>
+  <div class="bar"><button class="btn pri" id="saveExam">เริ่มตรวจ</button></div>
+</section>
+
+<!-- ผลคะแนน -->
+<section class="screen" id="results">
+  <header><button class="icon" data-go="home" aria-label="กลับ">←</button><h1 id="resTitle"></h1><button class="icon" id="editKey" aria-label="แก้เฉลย">✎</button></header>
+  <div class="stats" id="stats"></div>
+  <ul class="list" id="resList"></ul>
+  <div class="bar">
+    <button class="btn pri" id="scanMore">ตรวจ</button>
+    <button class="btn sm" id="expCsv">CSV</button>
+    <button class="btn sm" id="expXlsx">Excel</button>
+  </div>
+</section>
+
+<!-- ตั้งค่า -->
+<section class="screen" id="settings">
+  <header><button class="icon" data-go="home" aria-label="กลับ">←</button><h1>ตั้งค่า</h1></header>
+  <label class="f"><span>รายชื่อนักศึกษา (รหัส,ชื่อ-สกุล บรรทัดละคน) — ใช้เติมชื่ออัตโนมัติจากรหัสที่ฝน</span>
+    <textarea class="inp" id="sRoster" rows="5" placeholder="68170941615,อภิเดช จักรวรรณพร"></textarea></label>
+  <label class="f" id="sKeyRow"><span>Claude API key (ไม่บังคับ) — ให้ AI อ่านชื่อลายมือเมื่อไม่มีในรายชื่อ</span>
+    <input class="inp" id="sKey" type="password" autocomplete="off" placeholder="sk-ant-…"></label>
+  <label class="f" id="sHookRow"><span>Google Sheets Web App URL (ไม่บังคับ) — ส่งคะแนนขึ้นชีตทันทีที่ตรวจเสร็จ</span>
+    <input class="inp" id="sHook" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec"></label>
+  <p class="note" id="sNote">ข้อมูลทั้งหมดเก็บในเครื่องนี้ · API key ถูกส่งไปที่ api.anthropic.com เท่านั้น</p>
+  <div class="bar"><button class="btn pri" id="saveSettings">บันทึก</button></div>
+</section>
+
+<!-- กล้อง -->
+<section class="screen" id="scan">
+  <video id="video" playsinline muted autoplay></video>
+  <canvas id="overlay"></canvas>
+  <div class="guide" id="guide"></div>
+  <div class="stop"><button class="icon" id="scanClose" aria-label="ปิด">✕</button><div class="ttl" id="scanTitle"></div><div class="cnt" id="scanCount"></div></div>
+  <div class="card" id="card"></div>
+  <div class="shoot">
+    <div class="sheetart" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b><b></b><b></b></div>
+    <label class="cta" for="shot" id="shootBtn">ถ่ายภาพกระดาษ</label>
+    <input type="file" id="shot" accept="image/*" capture="environment" class="vh">
+    <label class="pickl" for="pick" id="pickBtn">หรือเลือกหลายรูปจากคลังภาพ</label>
+    <input type="file" id="pick" accept="image/*" multiple class="vh">
+  </div>
+  <div class="status"><span id="status">กำลังเปิดกล้อง…</span></div>
+</section>
+
+<div class="sheet" id="detail"><div id="detailBody"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="omr.js?v=9"></script>
+<script src="app.js?v=9"></script>
+<script async src="https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.10.0-release.1/dist/opencv.js"></script>
+</body>
+</html>

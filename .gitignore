@@ -1,0 +1,8 @@
+# รูปกระดาษคำตอบจริงมีชื่อและรหัสนักศึกษา ห้ามขึ้น git
+*.jpg
+*.jpeg
+*.png
+*.pdf
+test.html
+deploy/
+.claude/
